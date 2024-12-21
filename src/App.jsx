@@ -4,6 +4,7 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import "./index.css";
 import Header from "./components/Header";
+import ParticipantsList from "./components/ParticipantsList";
 
 function App() {
   // const [count, setCount] = useState(0);
@@ -11,6 +12,7 @@ function App() {
   return (
     <>
       <Header />
+      <ParticipantsList participants={["Satyam", "Sumit"]} />
     </>
   );
 }
