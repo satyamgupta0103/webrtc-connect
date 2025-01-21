@@ -2,12 +2,16 @@ import React, { useEffect, useCallback, useState } from "react";
 import { useSocket } from "../Context/SocketProvider";
 import peer from "../service/peer";
 import ReactPlayer from "react-player";
+import Navbar from "./Navbar";
+import { FcVideoCall } from "react-icons/fc";
+import ParticipantsList from "./ParticipantsList";
 
 function RoomPage() {
   const socket = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState();
   const [remoteStream, setRemoteStream] = useState();
+  const [participants, setParticipants] = useState(["Dennis", "Tim"]);
 
   const handleUserJoined = useCallback(({ name, id }) => {
     console.log(`Name ${name} joined room ${id}`);
@@ -44,17 +48,6 @@ function RoomPage() {
       peer.peer.addTrack(track, myStream);
     }
   }, [myStream]);
-
-  // const sendStreams = useCallback(() => {
-  //   const senders = peer.peer.getSenders();
-  //   for (const track of myStream.getTracks()) {
-  //     const alreadyAdded = senders.find((sender) => sender.track === track);
-  //     if (!alreadyAdded) {
-  //       console.log("Adding track:", track);
-  //       peer.peer.addTrack(track, myStream);
-  //     }
-  //   }
-  // }, [myStream]);
 
   const handleCallAccepted = useCallback(
     ({ from, ans }) => {
@@ -124,36 +117,119 @@ function RoomPage() {
   ]);
 
   return (
-    <div>
-      <h1>Welcome to Room</h1>
-      <h4>{remoteSocketId ? "Connected" : "No one in room"}</h4>
+    <div className="flex flex-col h-screen">
+      {/* Navbar at the top */}
+      <Navbar />
 
-      {remoteSocketId && <button onClick={handleCallUser}>CALL</button>}
-      {myStream && <button onClick={sendStreams}>Send Stream</button>}
-      {myStream && (
-        <>
-          <h1>My Stream</h1>
-          <ReactPlayer
-            playing
-            muted
-            height="100px"
-            width="200px"
-            url={myStream}
-          />
-        </>
-      )}
-      {remoteStream && (
-        <>
-          <h1>Remote Stream</h1>
-          <ReactPlayer
-            playing
-            muted
-            height="100px"
-            width="200px"
-            url={remoteStream}
-          />
-        </>
-      )}
+      {/* Main content layout */}
+      <div className="flex flex-grow">
+        {/* Sidebar for Participants */}
+        <ParticipantsList participants={participants} />
+
+        {/* Main content area */}
+        <div className="flex-grow bg-gray-900 text-white p-4">
+          <h1>Welcome to Room</h1>
+          <h4>{remoteSocketId ? "Connected" : "No one in room"}</h4>
+
+          {remoteSocketId && (
+            <button onClick={handleCallUser}>
+              <svg
+                className="h-8 w-8 text-green-500"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" />
+                <path d="M15 7a2 2 0 0 1 2 2" />
+                <path d="M15 3a6 6 0 0 1 6 6" />
+              </svg>
+            </button>
+          )}
+          {myStream && <button onClick={sendStreams}>Send Stream</button>}
+          {myStream && (
+            <>
+              <h1>My Stream</h1>
+              <ReactPlayer
+                playing
+                muted
+                height="100px"
+                width="200px"
+                url={myStream}
+              />
+            </>
+          )}
+          {remoteStream && (
+            <>
+              <h1>Remote Stream</h1>
+              <ReactPlayer
+                playing
+                muted
+                height="100px"
+                width="200px"
+                url={remoteStream}
+              />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* <div className="flex flex-grow">
+        <ParticipantsList participants={participants} />
+        <h1>Welcome to Room</h1>
+        <h4>{remoteSocketId ? "Connected" : "No one in room"}</h4>
+
+        {remoteSocketId && (
+          <button onClick={handleCallUser}>
+            <svg
+              class="h-8 w-8 text-green-500"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              {" "}
+              <path stroke="none" d="M0 0h24v24H0z" />{" "}
+              <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" />{" "}
+              <path d="M15 7a2 2 0 0 1 2 2" /> <path d="M15 3a6 6 0 0 1 6 6" />
+            </svg>
+          </button>
+        )}
+        {myStream && <button onClick={sendStreams}>Send Stream</button>}
+        {myStream && (
+          <>
+            <h1>My Stream</h1>
+            <ReactPlayer
+              playing
+              muted
+              height="100px"
+              width="200px"
+              url={myStream}
+            />
+          </>
+        )}
+        {remoteStream && (
+          <>
+            <h1>Remote Stream</h1>
+            <ReactPlayer
+              playing
+              muted
+              height="100px"
+              width="200px"
+              url={remoteStream}
+            />
+          </>
+        )}
+      </div> */}
     </div>
   );
 }
