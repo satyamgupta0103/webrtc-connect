@@ -6,7 +6,7 @@ const io = new Server(8000, {
 
 const nameToSocketIdMap = new Map();
 const socketIdToNameMap = new Map();
-const roomParticipants = new Map(); // Map to store participants for each room
+let participantsArray = [];
 
 io.on("connection", (socket) => {
   console.log(`Socket Connected`, socket.id);
@@ -17,25 +17,15 @@ io.on("connection", (socket) => {
     nameToSocketIdMap.set(name, socket.id);
     socketIdToNameMap.set(socket.id, name);
 
-    // Manage participants in the room
-    if (!roomParticipants.has(room)) {
-      roomParticipants.set(room, new Map());
-    }
-    roomParticipants.get(room).set(socket.id, name);
-    //console.log(roomParticipants);
+    // Add a participant to the array
+    participantsArray.push({ room: room, id: socket.id, name: name });
+    console.log(participantsArray);
 
-    //const serializedParticipantsMap = [...roomParticipants.entries()];
-
-    const serializedParticipantsArray = Array.from(
-      roomParticipants.values()
-    ).flatMap((participantsMap) =>
-      Array.from(participantsMap.entries()).map(([id, name]) => ({ id, name }))
+    //Emit the array directly to the room
+    io.to(room).emit(
+      "room:participants",
+      participantsArray.filter((p) => p.room === room)
     );
-
-    console.log(serializedParticipantsArray);
-
-    // Notify everyone in the room about the new participant
-    io.to(room).emit("room:participants", serializedParticipantsArray);
 
     io.to(room).emit("user:joined", { name, id: socket.id });
     socket.join(room);
