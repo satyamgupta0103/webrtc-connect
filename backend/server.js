@@ -6,29 +6,31 @@ const io = new Server(8000, {
 
 const nameToSocketIdMap = new Map();
 const socketIdToNameMap = new Map();
-let participantsArray = [];
+const participantsArray = new Map();
 
 io.on("connection", (socket) => {
   console.log(`Socket Connected`, socket.id);
 
   socket.on("room:join", (data) => {
-    //console.log(data);
     const { name, room } = data;
+    socket.join(room);
+
     nameToSocketIdMap.set(name, socket.id);
     socketIdToNameMap.set(socket.id, name);
 
-    // Add a participant to the array
-    participantsArray.push({ room: room, id: socket.id, name: name });
+    if (!participantsArray.has(room)) {
+      participantsArray.set(room, []);
+    }
+
+    // Add participant to the room
+    participantsArray.get(room).push({ id: socket.id, name: name });
     console.log(participantsArray);
 
-    //Emit the array directly to the room
-    io.to(room).emit(
-      "room:participants",
-      participantsArray.filter((p) => p.room === room)
-    );
-
+    // Notify only the participants of this room
+    io.to(room).emit("room:participants", participantsArray.get(room));
     io.to(room).emit("user:joined", { name, id: socket.id });
-    socket.join(room);
+
+    // Confirm to the user that they joined
     io.to(socket.id).emit("room:join", data);
   });
 
