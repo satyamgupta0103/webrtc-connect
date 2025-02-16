@@ -11,6 +11,7 @@ const participantsArray = new Map();
 io.on("connection", (socket) => {
   console.log(`Socket Connected`, socket.id);
 
+  //receiver
   socket.on("room:join", (data) => {
     const { name, room } = data;
     socket.join(room);
@@ -19,6 +20,7 @@ io.on("connection", (socket) => {
     socketIdToNameMap.set(socket.id, name);
 
     if (!participantsArray.has(room)) {
+      console.log("There is no room with named:", room);
       participantsArray.set(room, []);
     }
 
@@ -26,12 +28,36 @@ io.on("connection", (socket) => {
     participantsArray.get(room).push({ id: socket.id, name: name });
     console.log(participantsArray);
 
-    // Notify only the participants of this room
-    io.to(room).emit("room:participants", participantsArray.get(room));
-    io.to(room).emit("user:joined", { name, id: socket.id });
-
     // Confirm to the user that they joined
     io.to(socket.id).emit("room:join", data);
+
+    // Notify only the participants of this room
+    console.log("Participants are", participantsArray.get(room));
+    const participants = participantsArray.get(room);
+
+    io.to(room).emit("room:participants", participants);
+    io.to(room).emit("user:joined", { name, id: socket.id });
+
+    // Send the updated participants list **only to the newly joined user**
+    //io.to(socket.id).emit("room:participants", participants);
+  });
+
+  socket.on("disconnect", () => {
+    for (const [room, participants] of participantsArray.entries()) {
+      const index = participants.findIndex((user) => user.id === socket.id);
+      if (index !== -1) {
+        participants.splice(index, 1);
+
+        // Notify updated participant list
+        io.to(room).emit("room:participants", participants);
+
+        // Remove room if empty
+        if (participants.length === 0) {
+          participantsArray.delete(room);
+        }
+        break;
+      }
+    }
   });
 
   socket.on("user:call", ({ to, offer }) => {
