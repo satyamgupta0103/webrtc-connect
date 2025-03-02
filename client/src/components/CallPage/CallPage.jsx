@@ -12,6 +12,7 @@ const CallPage = () => {
       <CallPageHeader />
       <CallPageFooter />
       <MeetingInfo />
+      <Messenger />
     </div>
   );
 };
