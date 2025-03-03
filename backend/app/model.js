@@ -1,6 +1,6 @@
-const redisClient = require("./config/redis");
+import redisClient from "./config/redis.js";
 
-exports.saveCallId = async (key, value) => {
+export const saveCallId = async (key, value) => {
   try {
     await redisClient.set(key, JSON.stringify(value), {
       EX: 86400, // Expiration time in seconds (1 day)
@@ -11,7 +11,7 @@ exports.saveCallId = async (key, value) => {
   }
 };
 
-exports.getCallId = async (key) => {
+export const getCallId = async (key) => {
   try {
     const res = await redisClient.get(key);
     return res ? JSON.parse(res) : null;

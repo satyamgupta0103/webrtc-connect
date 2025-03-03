@@ -1,9 +1,11 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
-const controller = require("./controller");
+// const controller = require("./controller");
 
-router.post("/api/save-call-id", controller.saveCallId);
-router.get("api/get-call-id/:id", controller.getCallId);
+import { saveCallId, getCallId } from "./controller.js";
 
-module.exports = router;
+router.post("/api/save-call-id", saveCallId);
+router.get("api/get-call-id/:id", getCallId);
+
+export default router;
